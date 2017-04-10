@@ -1,0 +1,17 @@
+{
+  "name": "spectrumbot",
+  "version": "1.0.0",
+  "description": "Bot for resolv Pente Game",
+  "main": "app.js",
+  "scripts": {
+    "test": "exit 0"
+  },
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "body-parser": "^1.17.1",
+    "express": "^4.15.2",
+    "sails-disk": "^0.10.10",
+    "waterline": "^0.11.11"
+  }
+}
