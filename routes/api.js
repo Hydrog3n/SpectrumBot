@@ -83,21 +83,4 @@ router.post('/turn/:idplayer', function(req, res, next) {
 
 
 });
-
-router.createPartie = function() {
-    models.collections.game.create({}, function(err, model) {
-        return model;
-    });
-};
-
-router.createPlayer = function(groupname) {
-    models.collections.player.create({ "name": req.params.groupname}, function(err, model) {
-        if (err) {res.status(401).json(err)}
-        return {
-            "nomJoueur": req.params.groupname,
-            "idjoueur": model.id,
-            "code": 200
-        };
-    });
-}
 module.exports = router;
