@@ -18,7 +18,7 @@ var Server = Waterline.Collection.extend({
     },
     endpoint: {
       type: 'string',
-      required: true,
+      defaultsTo: '/'
     }
   }
 });

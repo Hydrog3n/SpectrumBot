@@ -1,5 +1,6 @@
 var express = require('express');
 var Waterline = require('waterline');
+var async    =  require('async');
 let models = require('../models');
 var router = express.Router();
 
@@ -11,28 +12,92 @@ router.get('/', function(req, res, next) {
     });
 });
 
-router.post('/setup', function(req, res, next) {
-    var body = req.body;
-    //console.log(body.data);
-    if (body.data === undefined) {
-        res.status(401).json({ 
-            'data' : { 
-                'error': 'nothing send'
-            }
-        });
-    }    
-    models.collections.server.findOne({where: { ip: body.data.ip }}).exec(function(err, result) {
-        if (err) { res.status(401).json(err)}
-        if (result == undefined) {
-            console.log(req.body.data);
-            models.collections.server.create(req.body.data, function(err, model) {
-                if (err) {res.status(401).json(err)}
-                res.status(201).json(model);
+router.get('/connect/:groupname', function(req, res, next) {
+    var game = null;
+    var player = null;
+    models.collections.game.find(function(err, result) {
+        if (result.length > 0) {
+            async.forEach(result, function(game, next) {
+                if (game.finpartie == false && game.player.length == 1) {
+                    models.collections.player.create({ "name": req.params.groupname}, function(err, model) {
+                        if (err) {res.status(503).json(err)}
+                        player = {
+                            "nomJoueur": req.params.groupname,
+                            "idjoueur": model.id,
+                            "code": 200
+                        };
+                        game.player.push(model);
+                        models.collections.game.update({id : game.id}, {"player": game.player}, function(err, updatedGame)  {
+                            res.status(200).json(player);
+                        });
+                    });
+                }
+                next()
+            }, function(err) {
+                if (err) return res.status(503).json(err);
+                models.collections.player.create({ "name": req.params.groupname}, function(err, model) {
+                    if (err) {res.status(503).json(err)}
+                    player = {
+                        "nomJoueur": req.params.groupname,
+                        "idjoueur": model.id,
+                        "code": 200
+                    };
+                    var newgame = {
+                        "finpartie": false,
+                        "tableau": [],
+                        "player": [model]
+                    }
+                    models.collections.game.create(newgame, function(err, model){
+                        if (err) return res.status(503).json(err);
+                        res.status(200).json(player);
+                    });
+                });
             });
         } else {
-            res.status(200).json(result);
+            models.collections.player.create({ "name": req.params.groupname}, function(err, model) {
+                if (err) {res.status(503).json(err)}
+                player = {
+                    "nomJoueur": req.params.groupname,
+                    "idjoueur": model.id,
+                    "code": 200
+                };
+                var newgame = {
+                    "finpartie": false,
+                    "tableau": [],
+                    "player": [model]
+                }
+                models.collections.game.create(newgame, function(err, model){
+                    if (err) return res.status(503).json(err);
+                    
+                    res.status(200).json(player);
+                });
+            }); 
         }
     });
 });
 
+router.post('/turn/:idplayer', function(req, res, next) {
+    models.collections.player.findOne({where : {id: req.params.id}}, function(err, result) {
+        console.log(result);
+    });
+
+
+});
+
+router.createPartie = function() {
+    models.collections.game.create({}, function(err, model) {
+        return model;
+    });
+};
+
+router.createPlayer = function(groupname) {
+    models.collections.player.create({ "name": req.params.groupname}, function(err, model) {
+        if (err) {res.status(401).json(err)}
+        return {
+            "nomJoueur": req.params.groupname,
+            "idjoueur": model.id,
+            "code": 200
+        };
+    });
+}
 module.exports = router;
