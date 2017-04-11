@@ -7,11 +7,11 @@ var Turn = Waterline.Collection.extend({
 
   attributes: {
     vertical: {
-    	type: 'int',
+    	type: 'integer',
     	required: true,
     },
     horizontal: {
-    	type: 'int',
+    	type: 'integer',
     	required: true,
     },
     game: {

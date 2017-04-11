@@ -11,11 +11,11 @@ var Player = Waterline.Collection.extend({
     	required: true
     },
     nbtennaille: {
-      type: 'int',
+      type: 'integer',
       defaultsTo: 0
     },
     numerojoueur: {
-      type: 'int',
+      type: 'integer',
       required: true,
     },
     games : {

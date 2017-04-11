@@ -1,6 +1,8 @@
 var express = require('express');
 var Waterline = require('waterline');
 var async    =  require('async');
+var Pente   = require('../libs/pente.js');
+
 let models = require('../models');
 var router = express.Router();
 
@@ -19,7 +21,6 @@ router.get('/connect/:groupname', function(req, res, next) {
         if (result.length > 0) {
             async.forEach(result, function(game, next) {
                 if (game.finpartie == false && game.player.length == 1) {
-                    console.log("add player");
                     models.collections.player.create({ "name": req.params.groupname, "numerojoueur": 2}, function(err, model) {
                         if (err) {res.status(503).json(err)}
                         player = {
@@ -37,7 +38,6 @@ router.get('/connect/:groupname', function(req, res, next) {
                     next();
                 }
             }, function(err) {
-                console.log('done');
                 if (err) return res.status(503).json(err);
                 models.collections.player.create({ "name": req.params.groupname, "numerojoueur": 1}, function(err, model) {
                     if (err) {res.status(503).json(err)}
@@ -49,7 +49,7 @@ router.get('/connect/:groupname', function(req, res, next) {
                     };
                     var newgame = {
                         "finpartie": false,
-                        "tableau": [],
+                        "tableau": genTableau(),
                         "player": [model]
                     }
                     models.collections.game.create(newgame, function(err, model){
@@ -59,7 +59,6 @@ router.get('/connect/:groupname', function(req, res, next) {
                 });
             });
         } else {
-            console.log('done');
             models.collections.player.create({ "name": req.params.groupname, "numerojoueur": 1}, function(err, model) {
                 if (err) {res.status(503).json(err)}
                 player = {
@@ -70,7 +69,7 @@ router.get('/connect/:groupname', function(req, res, next) {
                 };
                 var newgame = {
                     "finpartie": false,
-                    "tableau": [],
+                    "tableau": genTableau(),
                     "player": [model]
                 }
                 models.collections.game.create(newgame, function(err, model){
@@ -84,20 +83,21 @@ router.get('/connect/:groupname', function(req, res, next) {
 });
 
 router.get('/turn/:idplayer', function(req, res, next) {
-    //console.log(req.params.idplayer);
-    models.collections.game.find(function(err, games) {
+    models.collections.game.find({finpartie : false}, function(err, games) {
         async.each(games,function(game, next) {
-            console.log('game : '+game.id);
             async.each(game.player, function(player, next) {
-                console.log('player : '+player.id);
                 if (player.id == req.params.idplayer) {
+                    var status = 0;
+                    if (game.playerturn == player.numerojoueur ) {
+                        status = 1;
+                    }
                     var result = {
-                        "status": game.playerturn,
+                        "status": status,
                         "tableau": game.tableau,
                         "nbTenaillesJ1": game.player[0].nbtennaille,
-                        "nbTenaillesJ2": game.player[1].nbtennaille,
-                        "dernierCoupX": 0, //TODO
-                        "dernierCoupY": 0, //TODO 
+                        "nbTenaillesJ2": (game.player[1] ? game.player[1].nbtennaille : 0),
+                        "dernierCoupX": game.derniercoupx,
+                        "dernierCoupY": game.derniercoupy, 
                         "prolongation": game.prolongation,
                         "finPartie": game.finpartie,
                         "detailFinPartie": game.detailfinpartie,
@@ -114,4 +114,69 @@ router.get('/turn/:idplayer', function(req, res, next) {
         });
     });
 });
+
+router.get('/play/:x/:y/:idplayer', function(req, res, next) {
+    var turn = {
+        "vertical" : req.params.x,
+        "horizontal": req.params.y,
+    }
+
+    models.collections.game.find({finpartie : false}, function(err, games) {
+        async.each(games,function(game, next) {
+            async.each(game.player, function(player, next) {
+                if (player.id == req.params.idplayer && game.playerturn == player.numerojoueur) {
+                    var started = false
+                    /*if (player.id == game.playerstart.id) {
+                        started = true
+                    }*/
+                    var pente = new Pente(game.tableau, game.numtour, player, started);
+                    
+                    if (pente.autorise(turn.horizontal,turn.vertical)) {
+                        game.tableau[turn.horizontal][turn.vertical] = pente.coup(turn.horizontal,turn.vertical);
+                        game.derniercoupx = turn.horizontal;
+                        game.derniercoupy = turn.vertical;
+                        game.playerturn = (this.player.numerojoueur == 1 ? 2 : 1);
+                        
+                        if (pente.tenaille(turn.horizontal,turn.vertical)) {
+                            player.nbtennaille++;
+                        }
+                        //game.player[player.numerojoueur-1] = player; 
+                        models.collections.game.update({id : game.id}, game).exec(function(err, game) {
+                            models.collections.player.update({id : player.id}, player).exec(function(err, player) {
+                                turn.game = game;
+                                turn.player = player;
+                                models.collections.turn.create(turn, function(err, turn) { 
+                                    console.log(turn);
+                                    res.status(200).json({"code": 200});
+                                });
+                            })
+                        });
+                        
+                    } else {
+                        console.log('not authorize');
+                        res.status(406).json({"code": 406});
+                    }
+                } else {
+                    next();
+                }
+            }, next);
+        }, function() {
+            console.log('not found');
+            res.status(406).json({"code": 406});
+        });
+    });
+    
+});
+
+genTableau = function() {
+    var length = 18;
+    tableau = Array();
+    for (i = 0; i <= 18; i++) {
+        tableau.push(Array());
+        for(j= 0; j<= 18; j++) {
+            tableau[i].push(0);
+        }
+    }
+    return tableau;
+};
 module.exports = router;

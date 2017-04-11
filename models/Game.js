@@ -15,7 +15,7 @@ var Game = Waterline.Collection.extend({
       defaultsTo: false,
     },
     numtour : {
-      type: "int",
+      type: "integer",
       defaultsTo: 0
     },
     detailfinpartie: {
@@ -23,16 +23,19 @@ var Game = Waterline.Collection.extend({
       defaultsTo: ""
     },
     derniercoupx : {
-      type: 'int',
-      defaultsTo: -1 // -1 pas de coup, >= 0 position
+      type: 'integer',
+      defaultsTo: 0 // 0 pas de coup, > 0 position
     },
     derniercoupy : {
-      type: 'int',
-      defaultsTo: -1 // -1 pas de coup, >= 0 position
+      type: 'integer',
+      defaultsTo: 0 // 0 pas de coup, > 0 position
     },
     playerturn: {
-      type: "int",
+      type: "integer",
       defaultsTo: 0 // 0 en attente, 1 au joueur 1, 2 pour le joueur 2. 
+    },
+    playerstart: {
+      model: "player",
     },
     prolongation: {
       type: "boolean",
