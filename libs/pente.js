@@ -8,9 +8,11 @@ var Pente = function(tableau, nbtour, player, started) {
 Pente.prototype.autorise = function(x, y) {
     if (this.tableau[x][y] == 0) {
         if (this.started && this.turn == 2) {
-            var interditx = [7, 8, 9, 10, 11, 12];
-            var interdity = [7, 8, 9, 10, 11, 12];
-            if (interditx.indexOf(x) == 1 && interdity.indexOf(y)) {
+            var interdit = [6, 7, 8, 9, 10, 11];
+            console.log(this.turn);
+            console.log(interdit.indexOf(x));
+            console.log(interdit.indexOf(y));
+            if (interdit.indexOf(x) == 1 && interdit.indexOf(y)) {
                 return false;
             }
         }
@@ -22,6 +24,7 @@ Pente.prototype.autorise = function(x, y) {
 }
 
 Pente.prototype.coup = function(x, y) {
+    console.log(this.player.numerojoueur);
     this.tableau[x][y] = this.player.numerojoueur;
     return this.tableau[x][y];
 }
@@ -32,40 +35,47 @@ Pente.prototype.tenaille = function(x, y) {
         "tableau" : this.tableau,
         "tenaille": false 
     };
+    console.log('En: '+ enemievalue);
+    console.log(this.tableau[x][y]);
+    console.log(this.tableau[x][y+1]);
+    console.log(this.tableau[x][y+2]);
+    console.log(this.tableau[x][y+3]);
 
-    if (this.tableau[x-1] && this.tableau[x-2] && this.tableau[x-3] && this.tableau[x-1][y] == enemievalue && this.tableau[x-2][y] == enemievalue && this.tableau[x-3][y] == this.player.numjoueur) {
+    if (this.tableau[x-1] != undefined && this.tableau[x-2] != undefined && this.tableau[x-3] != undefined && this.tableau[x-1][y] == enemievalue && this.tableau[x-2][y] == enemievalue && this.tableau[x-3][y] == this.player.numjoueur) {
         this.tableau[x-1][y] = 0;
         this.tableau[x-2][y] = 0;
         result.tenaille = true;
-    } else if (this.tableau[x+1] && this.tableau[x+2] && this.tableau[x+3] && this.tableau[x+1][y] == enemievalue && this.tableau[x+2][y] == enemievalue && this.tableau[x+3][y] == this.player.numjoueur) {
+    } else if (this.tableau[x+1] != undefined && this.tableau[x+2] != undefined && this.tableau[x+3] != undefined && this.tableau[x+1][y] == enemievalue && this.tableau[x+2][y] == enemievalue && this.tableau[x+3][y] == this.player.numjoueur) {
         this.tableau[x+1][y] = 0;
         this.tableau[x+2][y] = 0;
         result.tenaille = true;
-    } else if (this.tableau[x][y+1] && this.tableau[x][y+2] && this.tableau[x][y+3] && this.tableau[x][y+1] == enemievalue && this.tableau[x][y+2] == enemievalue && this.tableau[x][y+3] == this.player.numjoueur) {
+    } else if (this.tableau[x][y+1] != undefined && this.tableau[x][y+2] != undefined && this.tableau[x][y+3] != undefined && this.tableau[x][y+1] == enemievalue && this.tableau[x][y+2] == enemievalue && this.tableau[x][y+3] == this.player.numjoueur) {
+        console.log('Tenaille');
         this.tableau[x+1][y] = 0;
         this.tableau[x+2][y] = 0;
         result.tenaille = true;
-    } else if (this.tableau[x][y-1] && this.tableau[x][y-2] && this.tableau[x][y-3] && this.tableau[x][y-1] == enemievalue && this.tableau[x][y-2] == enemievalue && this.tableau[x][y-3] == this.player.numjoueur) {
+    } else if (this.tableau[x][y-1] != undefined && this.tableau[x][y-2] != undefined && this.tableau[x][y-3] != undefined && this.tableau[x][y-1] == enemievalue && this.tableau[x][y-2] == enemievalue && this.tableau[x][y-3] == this.player.numjoueur) {
         this.tableau[x][y-1] = 0;
         this.tableau[x][y-2] = 0;
         result.tenaille = true;
-    } else if (this.tableau[x-1] && this.tableau[x-2] && this.tableau[x-3] && this.tableau[x-1][y+1] == enemievalue && this.tableau[x-2][y+2] == enemievalue && this.tableau[x-3][y+3] == this.player.numjoueur) {
+    } else if (this.tableau[x-1] != undefined && this.tableau[x-2] != undefined && this.tableau[x-3] != undefined && this.tableau[x-1][y+1] == enemievalue && this.tableau[x-2][y+2] == enemievalue && this.tableau[x-3][y+3] == this.player.numjoueur) {
         this.tableau[x-1][y+1] = 0;
         this.tableau[x-2][y+2] = 0;
         result.tenaille = true;
-    } else if (this.tableau[x-1] && this.tableau[x-2] && this.tableau[x-3] && this.tableau[x-1][y-1] == enemievalue && this.tableau[x-2][y-2] == enemievalue && this.tableau[x-3][y-3] == this.player.numjoueur) {
+    } else if (this.tableau[x-1] != undefined && this.tableau[x-2] != undefined && this.tableau[x-3] != undefined && this.tableau[x-1][y-1] == enemievalue && this.tableau[x-2][y-2] == enemievalue && this.tableau[x-3][y-3] == this.player.numjoueur) {
         this.tableau[x-1][y-1] = 0;
         this.tableau[x-2][y-2] = 0;
         result.tenaille = true;
-    } else if (this.tableau[x+1] && this.tableau[x+2] && this.tableau[x-3] && this.tableau[x+1][y-1] == enemievalue && this.tableau[x+2][y-2] == enemievalue && this.tableau[x+3][y-3] == this.player.numjoueur) {
+    } else if (this.tableau[x+1] != undefined && this.tableau[x+2] != undefined && this.tableau[x-3] != undefined && this.tableau[x+1][y-1] == enemievalue && this.tableau[x+2][y-2] == enemievalue && this.tableau[x+3][y-3] == this.player.numjoueur) {
         this.tableau[x+1][y-1] = 0;
         this.tableau[x+2][y-2] = 0;
         result.tenaille = true;
-    } else if (this.tableau[x+1] && this.tableau[x+2] && this.tableau[x+3] && this.tableau[x+1][y+1] == enemievalue && this.tableau[x+2][y+2] == enemievalue && this.tableau[x+3][y+3] == this.player.numjoueur) {
+    } else if (this.tableau[x+1] != undefined && this.tableau[x+2] != undefined && this.tableau[x+3] != undefined && this.tableau[x+1][y+1] == enemievalue && this.tableau[x+2][y+2] == enemievalue && this.tableau[x+3][y+3] == this.player.numjoueur) {
         this.tableau[x+1][y+1] = 0;
         this.tableau[x+2][y+2] = 0;
         result.tenaille = true;
     }
+    console.log(result);
     return result;
 }
 

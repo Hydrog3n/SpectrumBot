@@ -10,7 +10,7 @@ var Player = Waterline.Collection.extend({
     	type: 'string',
     	required: true
     },
-    nbtennaille: {
+    nbtenaille: {
       type: 'integer',
       defaultsTo: 0
     },

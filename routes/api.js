@@ -2,6 +2,8 @@ var express = require('express');
 var Waterline = require('waterline');
 var async    =  require('async');
 var Pente   = require('../libs/pente.js');
+var Libs   = require('../libs/Libs.js');
+var libs = new Libs();
 
 let models = require('../models');
 var router = express.Router();
@@ -94,8 +96,8 @@ router.get('/turn/:idplayer', function(req, res, next) {
                     var result = {
                         "status": status,
                         "tableau": game.tableau,
-                        "nbTenaillesJ1": game.player[0].nbtennaille,
-                        "nbTenaillesJ2": (game.player[1] ? game.player[1].nbtennaille : 0),
+                        "nbTenaillesJ1": game.player[0].nbtenaille,
+                        "nbTenaillesJ2": (game.player[1] ? game.player[1].nbtenaille : 0),
                         "dernierCoupX": game.derniercoupx,
                         "dernierCoupY": game.derniercoupy, 
                         "prolongation": game.prolongation,
@@ -126,20 +128,21 @@ router.get('/play/:x/:y/:idplayer', function(req, res, next) {
             async.each(game.player, function(player, next) {
                 if (player.id == req.params.idplayer && game.playerturn == player.numerojoueur) {
                     var started = false
-                    /*if (player.id == game.playerstart.id) {
+                    if (player.id == game.playerstart.id) {
                         started = true
-                    }*/
+                    }
                     var pente = new Pente(game.tableau, game.numtour, player, started);
                     
                     if (pente.autorise(turn.horizontal,turn.vertical)) {
                         game.tableau[turn.horizontal][turn.vertical] = pente.coup(turn.horizontal,turn.vertical);
                         game.derniercoupx = turn.horizontal;
                         game.derniercoupy = turn.vertical;
-                        game.playerturn = (this.player.numerojoueur == 1 ? 2 : 1);
-                        
-                        if (pente.tenaille(turn.horizontal,turn.vertical)) {
-                            player.nbtennaille++;
+                        game.playerturn = (player.numerojoueur == 1 ? 2 : 1);
+                        var response = pente.tenaille(turn.horizontal,turn.vertical);
+                        if (response.tenaille) {
+                            player.nbtenaille++;
                         }
+
                         //game.player[player.numerojoueur-1] = player; 
                         models.collections.game.update({id : game.id}, game).exec(function(err, game) {
                             models.collections.player.update({id : player.id}, player).exec(function(err, player) {
@@ -165,11 +168,17 @@ router.get('/play/:x/:y/:idplayer', function(req, res, next) {
             res.status(406).json({"code": 406});
         });
     });
-    
+});
+
+router.get('/start/:idpartie', function(req, res, next) {
+    libs.start(req.params.idpartie, res);
+});
+
+router.get('/info/:idpartie', function(req, res, next) {
+    libs.info(req.params.idpartie, res);
 });
 
 genTableau = function() {
-    var length = 18;
     tableau = Array();
     for (i = 0; i <= 18; i++) {
         tableau.push(Array());
