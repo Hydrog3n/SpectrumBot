@@ -118,9 +118,12 @@ router.get('/turn/:idplayer', function(req, res, next) {
 });
 
 router.get('/play/:x/:y/:idplayer', function(req, res, next) {
+    if (parseInt(req.params.x) == NaN && parseInt(req.params.y) == NaN) {
+        res.sendStatus(406);
+    } 
     var turn = {
-        "vertical" : req.params.x,
-        "horizontal": req.params.y,
+        "vertical" : parseInt(req.params.x),
+        "horizontal": parseInt(req.params.y),
     }
 
     models.collections.game.find({finpartie : false}, function(err, games) {
@@ -128,9 +131,11 @@ router.get('/play/:x/:y/:idplayer', function(req, res, next) {
             async.each(game.player, function(player, next) {
                 if (player.id == req.params.idplayer && game.playerturn == player.numerojoueur) {
                     var started = false
-                    if (player.id == game.playerstart.id) {
+                    
+                    if (player.id == game.playerstart) {
                         started = true
                     }
+                    console.log(game.numtour);
                     var pente = new Pente(game.tableau, game.numtour, player, started);
                     
                     if (pente.autorise(turn.horizontal,turn.vertical)) {
@@ -141,7 +146,9 @@ router.get('/play/:x/:y/:idplayer', function(req, res, next) {
                         var response = pente.tenaille(turn.horizontal,turn.vertical);
                         if (response.tenaille) {
                             player.nbtenaille++;
+                            game.tableau = response.tableau;
                         }
+                        game.numtour++;
 
                         //game.player[player.numerojoueur-1] = player; 
                         models.collections.game.update({id : game.id}, game).exec(function(err, game) {
