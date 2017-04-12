@@ -7,6 +7,7 @@ var Libs = function() {
 
 Libs.prototype.start = function(idPartie, res) {
     models.collections.game.findOne({where : {id : idPartie}}, function(err, game) {
+        if (err) return res.status(503).json(err);
         if (!game) {
             return res.sendStatus(404);
         }
@@ -24,7 +25,7 @@ Libs.prototype.start = function(idPartie, res) {
            game.playerturn = numPlayerStart == 1 ? 2 : 1;
            game.numtour++;
            models.collections.game.update({id : idPartie}, game, function(err, newgame) {
-            console.log(err);
+            if (err) return res.status(503).json(err);
             res.status(200).json({"msg" : "game started"})
            });
         } else {

@@ -147,7 +147,7 @@ router.get('/play/:x/:y/:idplayer', function(req, res, next) {
                             game.tableau = response.tableau;
                         }
                         game.numtour++;
-                        console.log('Win ? : ' + pente.win(turn.horizontal,turn.vertical));
+                       // console.log('Win ? : ' + pente.win(turn.horizontal,turn.vertical));
                         if (pente.win(turn.horizontal,turn.vertical) || player.nbtenaille == 5 || (response.tenaille && game.prolongation)) {
                             game.finpartie = true;
                             game.detailfinpartie = "C'est "+ player.name + " qui à gagné ! Bravo !";
