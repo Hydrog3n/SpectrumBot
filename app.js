@@ -8,11 +8,6 @@ var models      = require('./models');
 var connections = require('./configs/connections.js');
 
 models.initialize(connections, function(err, models) {
-    app.use(bodyParser.urlencoded({ extended: false }));
-    app.use(bodyParser.json());
-
-    app.use("/", routes);
-
     app.use(function(req, res, next) {
         res.header("Access-Control-Allow-Origin", "*");
         res.header("Access-Control-Allow-Methods", "POST, PUT, GET, DELETE, OPTIONS");
@@ -26,6 +21,11 @@ models.initialize(connections, function(err, models) {
         next();
     });
 
+    app.use("/", routes);
+
+    app.use(bodyParser.urlencoded({ extended: false }));
+    app.use(bodyParser.json());
+    
     app.use(function(req, res, next) {
         res.status(404);
         res.send({
