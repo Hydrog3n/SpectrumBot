@@ -194,7 +194,7 @@ Pente.prototype.win = function(x, y) {
             break;
         }
     }
-    
+    return false;
 }
 
 module.exports = Pente;

@@ -7,8 +7,14 @@ var Libs = function() {
 
 Libs.prototype.start = function(idPartie, res) {
     models.collections.game.findOne({where : {id : idPartie}}, function(err, game) {
+        if (!game) {
+            return res.sendStatus(404);
+        }
         if (game.player.length != 2) {
-            res.status(503).json({"msg" : "missing player"});
+            return res.status(503).json({"msg" : "missing player"});
+        }
+        if (game.numtour > 0) {
+            return res.status(503).json({"msg": "already in game"});
         }
         if (!game.finpartie && game.playerstart == undefined) {
            var numPlayerStart = Math.floor((Math.random() * 2) + 1);

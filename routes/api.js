@@ -76,7 +76,6 @@ router.get('/connect/:groupname', function(req, res, next) {
                 }
                 models.collections.game.create(newgame, function(err, model){
                     if (err) return res.status(503).json(err);
-                    
                     res.status(200).json(player);
                 });
             }); 
@@ -149,7 +148,7 @@ router.get('/play/:x/:y/:idplayer', function(req, res, next) {
                         }
                         game.numtour++;
                         console.log('Win ? : ' + pente.win(turn.horizontal,turn.vertical));
-                        if (pente.win(turn.horizontal,turn.vertical) || player.nbtenaille == 5) {
+                        if (pente.win(turn.horizontal,turn.vertical) || player.nbtenaille == 5 || (response.tenaille && game.prolongation)) {
                             game.finpartie = true;
                             game.detailfinpartie = "C'est "+ player.name + " qui à gagné ! Bravo !";
                         }
