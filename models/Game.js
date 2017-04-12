@@ -24,11 +24,11 @@ var Game = Waterline.Collection.extend({
     },
     derniercoupx : {
       type: 'integer',
-      defaultsTo: 0 // 0 pas de coup, > 0 position
+      defaultsTo: null // 0 pas de coup, > 0 position
     },
     derniercoupy : {
       type: 'integer',
-      defaultsTo: 0 // 0 pas de coup, > 0 position
+      defaultsTo: null // 0 pas de coup, > 0 position
     },
     playerturn: {
       type: "integer",

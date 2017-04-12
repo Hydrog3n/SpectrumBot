@@ -17,7 +17,6 @@ models.initialize(connections, function(err, models) {
             res.status(200);
             return res.send();
         }
-
         next();
     });
 

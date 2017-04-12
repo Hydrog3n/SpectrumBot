@@ -7,6 +7,9 @@ var Libs = function() {
 
 Libs.prototype.start = function(idPartie, res) {
     models.collections.game.findOne({where : {id : idPartie}}, function(err, game) {
+        if (game.player.length != 2) {
+            res.status(503).json({"msg" : "missing player"});
+        }
         if (!game.finpartie && game.playerstart == undefined) {
            var numPlayerStart = Math.floor((Math.random() * 2) + 1);
            game.playerstart = game.player[numPlayerStart - 1];

@@ -27,8 +27,8 @@ router.get('/connect/:groupname', function(req, res, next) {
                         if (err) {res.status(503).json(err)}
                         player = {
                             "nomJoueur": req.params.groupname,
-                            "idjoueur": model.id,
-                            "numerojoueur": model.numerojoueur,
+                            "idJoueur": model.id,
+                            "numJoueur": model.numerojoueur,
                             "code": 200
                         };
                         game.player.push(model);
@@ -45,8 +45,8 @@ router.get('/connect/:groupname', function(req, res, next) {
                     if (err) {res.status(503).json(err)}
                     player = {
                         "nomJoueur": req.params.groupname,
-                        "idjoueur": model.id,
-                        "numerojoueur": model.numerojoueur,
+                        "idJoueur": model.id,
+                        "numJoueur": model.numerojoueur,
                         "code": 200
                     };
                     var newgame = {
@@ -65,8 +65,8 @@ router.get('/connect/:groupname', function(req, res, next) {
                 if (err) {res.status(503).json(err)}
                 player = {
                     "nomJoueur": req.params.groupname,
-                    "idjoueur": model.id,
-                    "numerojoueur": model.numerojoueur,
+                    "idJoueur": model.id,
+                    "numJoueur": model.numerojoueur,
                     "code": 200
                 };
                 var newgame = {
@@ -149,6 +149,8 @@ router.get('/play/:x/:y/:idplayer', function(req, res, next) {
                             game.tableau = response.tableau;
                         }
                         game.numtour++;
+
+                        //pente.win(turn.horizontal,turn.vertical);
 
                         //game.player[player.numerojoueur-1] = player; 
                         models.collections.game.update({id : game.id}, game).exec(function(err, game) {
