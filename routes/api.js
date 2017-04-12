@@ -2,7 +2,7 @@ var express = require('express');
 var Waterline = require('waterline');
 var async    =  require('async');
 var Pente   = require('../libs/pente.js');
-var Libs   = require('../libs/Libs.js');
+var Libs   = require('../libs/libs.js');
 var libs = new Libs();
 
 let models = require('../models');
