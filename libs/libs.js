@@ -30,6 +30,13 @@ Libs.prototype.info = function(idPartie, res) {
         if (!game) return res.sendStatus(404);
         res.status(200).json(game);
     });
-}
+};
+
+Libs.prototype.parties = function(res) {
+    models.collections.game.find(function(err, result) {
+        res.status(200).json(result);
+    })
+};
+
 
 module.exports = Libs;

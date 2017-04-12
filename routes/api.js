@@ -178,6 +178,10 @@ router.get('/info/:idpartie', function(req, res, next) {
     libs.info(req.params.idpartie, res);
 });
 
+router.get('/parties', function(req, res, next) {
+    libs.parties(res);
+});
+
 genTableau = function() {
     tableau = Array();
     for (i = 0; i <= 18; i++) {

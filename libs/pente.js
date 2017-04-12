@@ -36,7 +36,7 @@ Pente.prototype.tenaille = function(x, y) {
         "tenaille": false 
     };
     console.log('En: '+ enemievalue);
-    console.log(this.tableau[x][y]);
+    console.log(this.tableau[x]);
     console.log(this.tableau[x][y+1]);
     console.log(this.tableau[x][y+2]);
     console.log(this.tableau[x][y+3]);
