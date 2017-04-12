@@ -14,6 +14,10 @@ var Player = Waterline.Collection.extend({
       type: 'integer',
       defaultsTo: 0
     },
+    codeplayer: {
+      type: 'string',
+      required: true,
+    },
     numerojoueur: {
       type: 'integer',
       required: true,

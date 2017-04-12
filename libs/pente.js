@@ -42,7 +42,6 @@ Pente.prototype.tenaille = function(x, y) {
         this.tableau[x+2][y] = 0;
         result.tenaille = true;
     } else if (this.tableau[x][y+1] != undefined && this.tableau[x][y+2] != undefined && this.tableau[x][y+3] != undefined && this.tableau[x][y+1] == enemievalue && this.tableau[x][y+2] == enemievalue && this.tableau[x][y+3] == this.player.numerojoueur) {
-        console.log('Tenaille');
         this.tableau[x+1][y] = 0;
         this.tableau[x+2][y] = 0;
         result.tenaille = true;
@@ -50,37 +49,35 @@ Pente.prototype.tenaille = function(x, y) {
         this.tableau[x][y-1] = 0;
         this.tableau[x][y-2] = 0;
         result.tenaille = true;
-    } else if (this.tableau[x-1] != undefined && this.tableau[x-2] != undefined && this.tableau[x-3] != undefined && this.tableau[x-1][y+1] == enemievalue && this.tableau[x-2][y+2] == enemievalue && this.tableau[x-3][y+3] == this.player.numerojoueur) {
+    } else if (this.tableau[x-1][y+1] != undefined && this.tableau[x-2][y+1] != undefined && this.tableau[x-3][y+3] != undefined && this.tableau[x-1][y+1] == enemievalue && this.tableau[x-2][y+2] == enemievalue && this.tableau[x-3][y+3] == this.player.numerojoueur) {
         this.tableau[x-1][y+1] = 0;
         this.tableau[x-2][y+2] = 0;
         result.tenaille = true;
-    } else if (this.tableau[x-1] != undefined && this.tableau[x-2] != undefined && this.tableau[x-3] != undefined && this.tableau[x-1][y-1] == enemievalue && this.tableau[x-2][y-2] == enemievalue && this.tableau[x-3][y-3] == this.player.numerojoueur) {
+    } else if (this.tableau[x-1][y-1] != undefined && this.tableau[x-2][y-2] != undefined && this.tableau[x-3][y-3] != undefined && this.tableau[x-1][y-1] == enemievalue && this.tableau[x-2][y-2] == enemievalue && this.tableau[x-3][y-3] == this.player.numerojoueur) {
         this.tableau[x-1][y-1] = 0;
         this.tableau[x-2][y-2] = 0;
         result.tenaille = true;
-    } else if (this.tableau[x+1] != undefined && this.tableau[x+2] != undefined && this.tableau[x-3] != undefined && this.tableau[x+1][y-1] == enemievalue && this.tableau[x+2][y-2] == enemievalue && this.tableau[x+3][y-3] == this.player.numerojoueur) {
+    } else if (this.tableau[x+1][y-1] != undefined && this.tableau[x+2][y-2] != undefined && this.tableau[x+3][y-3] != undefined && this.tableau[x+1][y-1] == enemievalue && this.tableau[x+2][y-2] == enemievalue && this.tableau[x+3][y-3] == this.player.numerojoueur) {
         this.tableau[x+1][y-1] = 0;
         this.tableau[x+2][y-2] = 0;
         result.tenaille = true;
-    } else if (this.tableau[x+1] != undefined && this.tableau[x+2] != undefined && this.tableau[x+3] != undefined && this.tableau[x+1][y+1] == enemievalue && this.tableau[x+2][y+2] == enemievalue && this.tableau[x+3][y+3] == this.player.numerojoueur) {
+    } else if (this.tableau[x+1][y+1] != undefined && this.tableau[x+2][y+2] != undefined && this.tableau[x+3][y+3] != undefined && this.tableau[x+1][y+1] == enemievalue && this.tableau[x+2][y+2] == enemievalue && this.tableau[x+3][y+3] == this.player.numerojoueur) {
         this.tableau[x+1][y+1] = 0;
         this.tableau[x+2][y+2] = 0;
         result.tenaille = true;
     }
     console.log(result);
-    this.tableau = result.tableau;
+     result.tableau = this.tableau;
     return result;
 };
 
 Pente.prototype.win = function(x, y) {
-    var result = {
-        "win": false,
-        "tableau": this.tableau
-    };
     var valid = true;
     var poidx = 0;
     var poidy = 0;
     var poidxy = 0;
+    var poidyx = 0;
+
     for(i = x+1; i <= 18; i++ ) {
         if (poidx >= 4) {
             return true;
@@ -132,9 +129,9 @@ Pente.prototype.win = function(x, y) {
             break;
         }
     }
-    valid = true
-    for(i = y-1; i >= 0; i--) {
-        for(j= x+1; j <= 18; j++) {
+    valid = true;
+    for(i = x-1; i >= 0; i--) {
+        for(j= y+1; j <= 18; j++) {
             if (poidyx >= 4) {
                 return true;
             }
@@ -145,9 +142,59 @@ Pente.prototype.win = function(x, y) {
                 valid = false;
                 break;
             }
+            break;
         }
     }
+    valid = true;
+    for(i = x+1; i >= 18; i++) {
+        for(j= y-1; j >= 0; j--) {
+            if (poidyx >= 4) {
+                return true;
+            }
+            if (valid && this.tableau[i][j] && this.tableau[i][j] == this.player.numerojoueur) {
+                valid = true;
+                poidyx++;
+            } else {
+                valid = false;
+                break;
+            }
+            break;
+        }
+    }
+    valid = true;
 
+    for(i = x-1; i <= 0; i--) {
+        for(j= y-1; j >= 0; j--) {
+            if (poidxy >= 4) {
+                return true;
+            }
+            if (valid && this.tableau[i][j] && this.tableau[i][j] == this.player.numerojoueur) {
+                valid = true;
+                poidxy++;
+            } else {
+                valid = false;
+                break;
+            }
+            break;
+        }
+    }
+    valid = true;
+    for(i = x+1; i >= 18; i--) {
+        for(j= y+1; j >= 18; j--) {
+            if (poidxy >= 4) {
+                return true;
+            }
+            if (valid && this.tableau[i][j] && this.tableau[i][j] == this.player.numerojoueur) {
+                valid = true;
+                poidxy++;
+            } else {
+                valid = false;
+                break;
+            }
+            break;
+        }
+    }
+    
 }
 
 module.exports = Pente;

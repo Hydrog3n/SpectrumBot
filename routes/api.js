@@ -23,11 +23,11 @@ router.get('/connect/:groupname', function(req, res, next) {
         if (result.length > 0) {
             async.forEach(result, function(game, next) {
                 if (game.finpartie == false && game.player.length == 1) {
-                    models.collections.player.create({ "name": req.params.groupname, "numerojoueur": 2}, function(err, model) {
+                    models.collections.player.create({ "name": req.params.groupname, "numerojoueur": 2, "codeplayer": makeid()}, function(err, model) {
                         if (err) {res.status(503).json(err)}
                         player = {
                             "nomJoueur": req.params.groupname,
-                            "idJoueur": model.id,
+                            "idJoueur": model.codeplayer,
                             "numJoueur": model.numerojoueur,
                             "code": 200
                         };
@@ -41,11 +41,11 @@ router.get('/connect/:groupname', function(req, res, next) {
                 }
             }, function(err) {
                 if (err) return res.status(503).json(err);
-                models.collections.player.create({ "name": req.params.groupname, "numerojoueur": 1}, function(err, model) {
+                models.collections.player.create({ "name": req.params.groupname, "numerojoueur": 1, "codeplayer": makeid()}, function(err, model) {
                     if (err) {res.status(503).json(err)}
                     player = {
                         "nomJoueur": req.params.groupname,
-                        "idJoueur": model.id,
+                        "idJoueur": model.codeplayer,
                         "numJoueur": model.numerojoueur,
                         "code": 200
                     };
@@ -61,11 +61,11 @@ router.get('/connect/:groupname', function(req, res, next) {
                 });
             });
         } else {
-            models.collections.player.create({ "name": req.params.groupname, "numerojoueur": 1}, function(err, model) {
+            models.collections.player.create({ "name": req.params.groupname, "numerojoueur": 1, "codeplayer": makeid()}, function(err, model) {
                 if (err) {res.status(503).json(err)}
                 player = {
                     "nomJoueur": req.params.groupname,
-                    "idJoueur": model.id,
+                    "idJoueur": model.codeplayer,
                     "numJoueur": model.numerojoueur,
                     "code": 200
                 };
@@ -85,10 +85,10 @@ router.get('/connect/:groupname', function(req, res, next) {
 });
 
 router.get('/turn/:idplayer', function(req, res, next) {
-    models.collections.game.find({finpartie : false}, function(err, games) {
+    models.collections.game.find(function(err, games) {
         async.each(games,function(game, next) {
             async.each(game.player, function(player, next) {
-                if (player.id == req.params.idplayer) {
+                if (player.codeplayer == req.params.idplayer) {
                     var status = 0;
                     if (game.playerturn == player.numerojoueur ) {
                         status = 1;
@@ -129,13 +129,12 @@ router.get('/play/:x/:y/:idplayer', function(req, res, next) {
     models.collections.game.find({finpartie : false}, function(err, games) {
         async.each(games,function(game, next) {
             async.each(game.player, function(player, next) {
-                if (player.id == req.params.idplayer && game.playerturn == player.numerojoueur) {
+                if (player.codeplayer == req.params.idplayer && game.playerturn == player.numerojoueur) {
                     var started = false
                     
                     if (player.id == game.playerstart) {
                         started = true
                     }
-                    console.log(game.numtour);
                     var pente = new Pente(game.tableau, game.numtour, player, started);
                     
                     if (pente.autorise(turn.horizontal,turn.vertical)) {
@@ -149,8 +148,11 @@ router.get('/play/:x/:y/:idplayer', function(req, res, next) {
                             game.tableau = response.tableau;
                         }
                         game.numtour++;
-
-                        //pente.win(turn.horizontal,turn.vertical);
+                        console.log('Win ? : ' + pente.win(turn.horizontal,turn.vertical));
+                        if (pente.win(turn.horizontal,turn.vertical) || player.nbtenaille == 5) {
+                            game.finpartie = true;
+                            game.detailfinpartie = "C'est "+ player.name + " qui à gagné ! Bravo !";
+                        }
 
                         //game.player[player.numerojoueur-1] = player; 
                         models.collections.game.update({id : game.id}, game).exec(function(err, game) {
@@ -158,7 +160,6 @@ router.get('/play/:x/:y/:idplayer', function(req, res, next) {
                                 turn.game = game;
                                 turn.player = player;
                                 models.collections.turn.create(turn, function(err, turn) { 
-                                    console.log(turn);
                                     res.status(200).json({"code": 200});
                                 });
                             })
@@ -201,4 +202,15 @@ genTableau = function() {
     }
     return tableau;
 };
+
+makeid = function()
+{
+    var text = "";
+    var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+
+    for( var i=0; i < 5; i++ )
+        text += possible.charAt(Math.floor(Math.random() * possible.length));
+
+    return text;
+}
 module.exports = router;
