@@ -57,5 +57,26 @@ Libs.prototype.parties = function(res) {
     })
 };
 
+Libs.prototype.clear = function(code, res) {
+    if (code === "093") {
+        models.collections.game.destroy({})
+        .then(function() {
+            models.collections.player.destroy({}, function(err) {
+            });
+        }).then(function() {
+            models.collections.turn.destroy({}, function(err) {    
+            });
+        }).then(function() {
+            res.status(200).json({"attaque" : {
+                "nom": "Léchouille",
+                "puissance" : 30,
+                "precision" : 100,
+                "pp" : 30
+            }
+            });
+        })
+    }
+}
+
 
 module.exports = Libs;

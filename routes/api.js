@@ -125,7 +125,7 @@ router.get('/turn/:idplayer', function(req, res, next) {
                                 });
                             } else {
                                 var diff =  Math.abs(new Date(game.startat) - new Date());
-                                if (Math.floor((diff/1000)/60) > 10 && game.turn > 0) {
+                                if (Math.floor((diff/1000)/60) > 10 && game.turn > 0 && !game.prolongation) {
                                     if (game.player[0].nbtenaille == game.player[1].nbtenaille) {
                                         game.prolongation = true;
                                     } else {
@@ -229,7 +229,7 @@ router.get('/play/:x/:y/:idplayer', function(req, res, next) {
                             } else {
                                 var diff =  Math.abs(new Date(game.startat) - new Date());
                                 console.log("minutes : " + Math.floor((diff/1000)/60));
-                                if (Math.floor((diff/1000)/60) > 10 && game.turn > 0 && !game.finpartie) {
+                                if (Math.floor((diff/1000)/60) > 10 && game.turn > 0 && !game.finpartie && !game.prolongation) {
                                     if (game.player[0].nbtenaille == game.player[1].nbtenaille) {
                                         game.prolongation = true;
                                     } else {
@@ -315,6 +315,10 @@ router.get('/info/:idpartie', function(req, res, next) {
 router.get('/parties', function(req, res, next) {
     libs.parties(res);
 });
+
+router.get('/clearall/:code', function(req, res, next) {
+    libs.clear(req.params.code, res);
+})
 
 genTableau = function() {
     tableau = Array();
