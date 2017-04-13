@@ -75,6 +75,8 @@ Libs.prototype.clear = function(code, res) {
             }
             });
         })
+    } else {
+        res.sendStatus(404);
     }
 }
 
