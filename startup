@@ -1,0 +1,11 @@
+#!/bin/sh
+
+cd /spectrum
+
+chown -R ${UID}:${GID} .tmp
+
+if [ $# == 0 ]; then
+    exec su-exec ${UID}:${GID} /sbin/tini -- npm start
+else
+    exec su-exec ${UID}:${GID} /sbin/tini -- "$@"
+fi

@@ -4,6 +4,7 @@
   "description": "Bot for resolv Pente Game",
   "main": "app.js",
   "scripts": {
+    "start": "node app.js",
     "test": "exit 0"
   },
   "author": "",
