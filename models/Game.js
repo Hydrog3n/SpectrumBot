@@ -34,8 +34,9 @@ var Game = Waterline.Collection.extend({
       type: "integer",
       defaultsTo: 0 // 0 en attente, 1 au joueur 1, 2 pour le joueur 2. 
     },
-    startAt: {
+    startat: {
       type: "datetime",
+      defaultsTo: "0"
     },
     playerstart: {
       model: "player",

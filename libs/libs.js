@@ -24,9 +24,18 @@ Libs.prototype.start = function(idPartie, res) {
            game.tableau[9][9] = pente.coup(9, 9);
            game.playerturn = numPlayerStart == 1 ? 2 : 1;
            game.numtour++;
-           models.collections.game.update({id : idPartie}, game, function(err, newgame) {
+           game.startat = new Date();
+           models.collections.game.update({id : game.id}, game, function(err, newgame) {
             if (err) return res.status(503).json(err);
-            res.status(200).json({"msg" : "game started"})
+            var turn = {
+                "vertical" : 9,
+                "horizontal" : 9,
+                "player" : game.playerstart,
+                "game" : game
+            }
+            models.collections.turn.create(turn, function(err, turn) {
+                res.status(200).json({"msg" : "game started"});
+            });
            });
         } else {
             res.sendStatus(401);

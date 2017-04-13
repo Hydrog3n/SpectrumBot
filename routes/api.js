@@ -88,24 +88,102 @@ router.get('/turn/:idplayer', function(req, res, next) {
         async.each(games,function(game, next) {
             async.each(game.player, function(player, next) {
                 if (player.codeplayer == req.params.idplayer) {
-                    var status = 0;
-                    if (game.playerturn == player.numerojoueur ) {
-                        status = 1;
-                    }
-                    var result = {
-                        "status": status,
-                        "tableau": game.tableau,
-                        "nbTenaillesJ1": game.player[0].nbtenaille,
-                        "nbTenaillesJ2": (game.player[1] ? game.player[1].nbtenaille : 0),
-                        "dernierCoupX": game.derniercoupx,
-                        "dernierCoupY": game.derniercoupy, 
-                        "prolongation": game.prolongation,
-                        "finPartie": game.finpartie,
-                        "detailFinPartie": game.detailfinpartie,
-                        "numTour": game.numtour,
-                        "code": 200
-                    }
-                    res.status(200).json(result);
+                    models.collections.turn.find({where : {game : game.id}, sort: 'id DESC' }, function(err, result) {
+                        if (result.length > 0) {                        
+                            var diffturn = Math.abs(new Date(result[0].createdAt) - new Date());
+                            console.log("Seconde : " + Math.floor(diffturn/1000));
+                            if (Math.floor((diffturn/1000)) > 12 && game.turn > 0) {
+                                game.finpartie = true;
+                                if (result[0].player == game.player[0].id) {
+                                    var perdant = game.player[1];
+                                    var gagnant = game.player[0];
+                                } else {
+                                    var perdant = game.player[0];
+                                    var gagnant = game.player[1];
+                                }
+                                
+                                game.detailfinpartie = "C'est " + gagnant.name + " qui à gagné car " + perdant.name + " à mit trop de temps à joueur ! Bravo !";
+                                models.collections.game.update({id : game.id}, game).exec(function(err, newgame) {
+                                    var status = 0;
+                                    if (newgame.playerturn == player.numerojoueur ) {
+                                        status = 1;
+                                    }
+                                    var result = {
+                                        "status": status,
+                                        "tableau": newgame.tableau,
+                                        "nbTenaillesJ1": newgame.player[0].nbtenaille,
+                                        "nbTenaillesJ2": (newgame.player[1] ? newgame.player[1].nbtenaille : 0),
+                                        "dernierCoupX": newgame.derniercoupx,
+                                        "dernierCoupY": newgame.derniercoupy, 
+                                        "prolongation": newgame.prolongation,
+                                        "finPartie": newgame.finpartie,
+                                        "detailFinPartie": newgame.detailfinpartie,
+                                        "numTour": newgame.numtour,
+                                        "code": 200
+                                    }
+                                    res.status(200).json(result);
+                                });
+                            } else {
+                                var diff =  Math.abs(new Date(game.startat) - new Date());
+                                if (Math.floor((diff/1000)/60) > 10 && game.turn > 0) {
+                                    if (game.player[0].nbtenaille == game.player[1].nbtenaille) {
+                                        game.prolongation = true;
+                                    } else {
+                                        if (game.player[0].nbtenaille > game.player[1].nbtenaille) {
+                                            game.finpartie = true;
+                                            game.detailfinpartie = "C'est " + game.player[0].name + " qui à gagné car il a le plus de tenaille ! Bravo !";
+                                            models.collections.game.update({id : game.id}, game).exec(function(err, newgame) {
+                                                
+                                            });
+                                        } else {
+                                            game.finpartie = true;
+                                            game.detailfinpartie = "C'est " + game.player[1].name + " qui à gagné car il a le plus de tenaille ! Bravo !";
+                                            models.collections.game.update({id : game.id}, game).exec(function(err, newgame) {
+                                                
+                                            });
+                                        }
+                                    }
+                                }
+                                var status = 0;
+                                if (game.playerturn == player.numerojoueur ) {
+                                    status = 1;
+                                }
+                                var result = {
+                                    "status": status,
+                                    "tableau": game.tableau,
+                                    "nbTenaillesJ1": game.player[0].nbtenaille,
+                                    "nbTenaillesJ2": (game.player[1] ? game.player[1].nbtenaille : 0),
+                                    "dernierCoupX": game.derniercoupx,
+                                    "dernierCoupY": game.derniercoupy, 
+                                    "prolongation": game.prolongation,
+                                    "finPartie": game.finpartie,
+                                    "detailFinPartie": game.detailfinpartie,
+                                    "numTour": game.numtour,
+                                    "code": 200
+                                }
+                                res.status(200).json(result);
+                            }
+                        } else {
+                            var status = 0;
+                                if (game.playerturn == player.numerojoueur ) {
+                                    status = 1;
+                                }
+                                var result = {
+                                    "status": status,
+                                    "tableau": game.tableau,
+                                    "nbTenaillesJ1": game.player[0].nbtenaille,
+                                    "nbTenaillesJ2": (game.player[1] ? game.player[1].nbtenaille : 0),
+                                    "dernierCoupX": game.derniercoupx,
+                                    "dernierCoupY": game.derniercoupy, 
+                                    "prolongation": game.prolongation,
+                                    "finPartie": game.finpartie,
+                                    "detailFinPartie": game.detailfinpartie,
+                                    "numTour": game.numtour,
+                                    "code": 200
+                                }
+                                res.status(200).json(result);
+                        }
+                    });   
                 } else {
                     next();
                 }
@@ -118,7 +196,7 @@ router.get('/turn/:idplayer', function(req, res, next) {
 
 router.get('/play/:x/:y/:idplayer', function(req, res, next) {
     if (parseInt(req.params.x) == NaN && parseInt(req.params.y) == NaN) {
-        res.sendStatus(406);
+        res.status(406).json({ "code": 406});
     } 
     var turn = {
         "vertical" : parseInt(req.params.x),
@@ -129,45 +207,92 @@ router.get('/play/:x/:y/:idplayer', function(req, res, next) {
         async.each(games,function(game, next) {
             async.each(game.player, function(player, next) {
                 if (player.codeplayer == req.params.idplayer && game.playerturn == player.numerojoueur) {
-                    var started = false
-                    
-                    if (player.id == game.playerstart) {
-                        started = true
-                    }
-                    var pente = new Pente(game.tableau, game.numtour, player, started);
-                    
-                    if (pente.autorise(turn.horizontal,turn.vertical)) {
-                        game.tableau[turn.horizontal][turn.vertical] = pente.coup(turn.horizontal,turn.vertical);
-                        game.derniercoupx = turn.horizontal;
-                        game.derniercoupy = turn.vertical;
-                        game.playerturn = (player.numerojoueur == 1 ? 2 : 1);
-                        var response = pente.tenaille(turn.horizontal,turn.vertical);
-                        if (response.tenaille) {
-                            player.nbtenaille++;
-                            game.tableau = response.tableau;
-                        }
-                        game.numtour++;
-                       // console.log('Win ? : ' + pente.win(turn.horizontal,turn.vertical));
-                        if (pente.win(turn.horizontal,turn.vertical) || player.nbtenaille == 5 || (response.tenaille && game.prolongation)) {
-                            game.finpartie = true;
-                            game.detailfinpartie = "C'est "+ player.name + " qui à gagné ! Bravo !";
-                        }
-
-                        //game.player[player.numerojoueur-1] = player; 
-                        models.collections.game.update({id : game.id}, game).exec(function(err, game) {
-                            models.collections.player.update({id : player.id}, player).exec(function(err, player) {
-                                turn.game = game;
-                                turn.player = player;
-                                models.collections.turn.create(turn, function(err, turn) { 
-                                    res.status(200).json({"code": 200});
+                    models.collections.turn.find({where : {game : game.id}, sort: 'id DESC' }, function(err, result) {    
+                        if (result.length > 0) {
+                            var diffturn = Math.abs(new Date(result[0].createdAt) - new Date());
+                            console.log("Seconde : " + Math.floor(diffturn/1000));
+                            if (Math.floor(diffturn/1000) > 12 && game.numtour > 0) {
+                                game.finpartie = true;
+                                console.log(result[0].player);
+                                console.log(result[1].player);
+                                if (result[0].player == game.player[0].id) {
+                                    var perdant = game.player[1];
+                                    var gagnant = game.player[0];
+                                } else {
+                                    var perdant = game.player[0];
+                                    var gagnant = game.player[1];
+                                }
+                                game.detailfinpartie = "C'est " + gagnant.name + " qui à gagné car " + perdant.name + " à mit trop de temps à joueur ! Bravo !";
+                                models.collections.game.update({id : game.id}, game).exec(function(err, newgame) {
+                                    res.status(406).json({ "code": 406});
                                 });
-                            })
-                        });
-                        
-                    } else {
-                        console.log('not authorize');
-                        res.status(406).json({"code": 406});
-                    }
+                            } else {
+                                var diff =  Math.abs(new Date(game.startat) - new Date());
+                                console.log("minutes : " + Math.floor((diff/1000)/60));
+                                if (Math.floor((diff/1000)/60) > 10 && game.turn > 0 && !game.finpartie) {
+                                    if (game.player[0].nbtenaille == game.player[1].nbtenaille) {
+                                        game.prolongation = true;
+                                    } else {
+                                        if (game.player[0].nbtenaille > game.player[1].nbtenaille) {
+                                            game.finpartie = true;
+                                            game.detailfinpartie = "C'est " + game.player[0].name + " qui à gagné car il a le plus de tenaille ! Bravo !";
+                                            models.collections.game.update({id : game.id}, game).exec(function(err, newgame) {
+                                                res.status(406).json({ "code": 406});
+                                            });
+                                        } else {
+                                            game.finpartie = true;
+                                            game.detailfinpartie = "C'est " + game.player[1].name + " qui à gagné car il a le plus de tenaille ! Bravo !";
+                                            models.collections.game.update({id : game.id}, game).exec(function(err, newgame) {
+                                                res.status(406).json({ "code": 406});
+                                            });
+                                        }
+                                    }
+                                }
+                                var started = false
+                                
+                                if (player.id == game.playerstart) {
+                                    started = true
+                                }
+                                var pente = new Pente(game.tableau, game.numtour, player, started);
+                                
+                                if (pente.autorise(turn.horizontal,turn.vertical)) {
+                                    game.tableau[turn.horizontal][turn.vertical] = pente.coup(turn.horizontal,turn.vertical);
+                                    game.derniercoupx = turn.horizontal;
+                                    game.derniercoupy = turn.vertical;
+                                    game.playerturn = (player.numerojoueur == 1 ? 2 : 1);
+                                    var response = pente.tenaille(turn.horizontal,turn.vertical);
+                                    if (response.tenaille) {
+                                        player.nbtenaille += response.nbtenaille;
+                                        game.tableau = response.tableau;
+                                    }
+                                    game.numtour++;
+                                // console.log('Win ? : ' + pente.win(turn.horizontal,turn.vertical));
+                                    if (pente.win(turn.horizontal,turn.vertical) || player.nbtenaille == 5 || (response.tenaille && game.prolongation)) {
+                                        game.finpartie = true;
+                                        game.detailfinpartie = "C'est " + player.name + " qui à gagné ! Bravo !";
+                                    }
+
+                                    //game.player[player.numerojoueur-1] = player; 
+                                    models.collections.game.update({id : game.id}, game).exec(function(err, newgame) {
+                                        models.collections.player.update({id : player.id}, player).exec(function(err, newplayer) {
+                                            turn.game = newgame[0];
+                                            turn.player = newplayer[0];
+                                            models.collections.turn.create(turn, function(err, turn) { 
+                                                res.status(200).json({"code": 200});
+                                            });
+                                        })
+                                    });
+                                    
+                                } else {
+                                    console.log('not authorize');
+                                    res.status(406).json({"code": 406});
+                                }
+                            }
+                        } else {
+                            res.status(406).json({"code": 406});
+                        }
+                    });
+                    
                 } else {
                     next();
                 }
