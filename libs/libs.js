@@ -15,7 +15,7 @@ Libs.prototype.start = function(idPartie, res) {
             return res.status(503).json({"msg" : "missing player"});
         }
         if (game.numtour > 0) {
-            return res.status(503).json({"msg": "already in game"});
+            return res.status(200).json({"msg": "already in game"});
         }
         if (!game.finpartie && game.playerstart == undefined) {
            var numPlayerStart = Math.floor((Math.random() * 2) + 1);
