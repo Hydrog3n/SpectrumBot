@@ -10,7 +10,7 @@ var Pente = function(tableau, nbtour, player, started) {
 Pente.prototype.autorise = function(x, y) {
     if (this.tableau[x][y] == 0) {
         if (this.started && this.nbtour == 2) {
-            if (x >= 7 && x <= 11 && y >= 7 && y <= 11) {
+            if (x >= 6 && x <= 12 && y >= 6 && y <= 12) {
                 return false;
             }
         }
